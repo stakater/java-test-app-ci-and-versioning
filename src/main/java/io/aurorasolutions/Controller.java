@@ -15,4 +15,9 @@ public class Controller {
     public String hello(){
         return "Hello World!";
     }
+
+    @RequestMapping(method = RequestMethod.GET, path = "/test")
+    public String test(){
+        return "Testing commit for 2nd build";
+    }
 }
