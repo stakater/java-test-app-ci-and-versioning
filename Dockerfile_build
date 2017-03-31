@@ -1,0 +1,11 @@
+# Work in progress: create gradle image and use that
+FROM rasheedamir/java-web-app-docker
+
+# Create mount point
+VOLUME ["/home/aurora"]
+
+# Add code to the filesystem of the container
+ADD . /home/aurora/
+
+# Set working directory
+WORKDIR /home/aurora/

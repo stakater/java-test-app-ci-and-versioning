@@ -1,0 +1,27 @@
+# Work in progress: there should be a single build
+# Why 3 different? to propagate errors from scripts
+compile:
+  build: .
+  dockerfile: Dockerfile_build
+  volumes:
+    - ~/.gradle:/root/.gradle
+    - ~/.m2:/root/.m2
+  command: gradle clean -x test build --info
+
+test:
+  build: .
+  dockerfile: Dockerfile_build
+  volumes:
+    - ~/.gradle:/root/.gradle
+    - ~/.m2:/root/.m2
+  command: gradle test
+
+app:
+  build: .
+  dockerfile: Dockerfile_build
+  volumes:
+    - ~/.gradle:/root/.gradle
+    - ~/.m2:/root/.m2
+    - /app/outputs/java-test-app:./build/libs/
+    - /app/.grails:/root/.grails
+  command: gradle build war
