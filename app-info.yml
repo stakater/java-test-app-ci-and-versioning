@@ -1,0 +1,13 @@
+# Application Info file required by Stakater
+
+# Mock attributes
+application:
+  name: "test"
+  group: "test"
+
+# Versioning attributes
+# Version will only be read from here if it is bumped i.e. greater than the current version
+version:
+  major: 0
+  minor: 2
+  patch: 0
