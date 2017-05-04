@@ -1,5 +1,4 @@
-# Work in progress: create gradle image and use that
-FROM rasheedamir/java-web-app-docker
+FROM stakater/gradle:3.5-alpine
 
 # Create mount point
 VOLUME ["/home/aurora"]
