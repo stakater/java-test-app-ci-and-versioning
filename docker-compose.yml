@@ -1,0 +1,36 @@
+version: '3'
+
+services:
+  compile:
+    build:
+      context: ./
+      dockerfile: ./deployment/build/Dockerfile
+    image: ${BUILD_IMAGE_NAME}
+    container_name: ${BUILD_IMAGE_NAME}-compile
+    volumes:
+      - ~/.gradle:/root/.gradle
+      - ~/.m2:/root/.m2
+    command: gradle clean -x test build --info
+
+  test:
+    build:
+      context: ./
+      dockerfile: ./deployment/build/Dockerfile
+    image: ${BUILD_IMAGE_NAME}
+    container_name: ${BUILD_IMAGE_NAME}-test
+    volumes:
+      - ~/.gradle:/root/.gradle
+      - ~/.m2:/root/.m2
+    command: gradle test
+
+  package:
+    build:
+      context: ./
+      dockerfile: ./deployment/build/Dockerfile
+    image: ${BUILD_IMAGE_NAME}
+    container_name: ${BUILD_IMAGE_NAME}-package
+    volumes:
+      - ~/.gradle:/root/.gradle
+      - ~/.m2:/root/.m2
+      - ./deployment/publish/outputs:/home/aurora/build/libs/
+    command: gradle build war
