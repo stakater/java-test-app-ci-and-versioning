@@ -1,10 +1,12 @@
 # Application Info file required by Stakater
 
-# Mock attributes
 application:
-  name: "test"
+  # Must not contain spaces
+  name: "java-test-app"
   group: "test"
 
+deployment:
+  build-output-path: "./docker-data/publish"
 # Versioning attributes
 # Version will only be read from here if it is bumped i.e. greater than the current version
 version:
