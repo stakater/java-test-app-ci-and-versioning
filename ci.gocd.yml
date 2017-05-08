@@ -1,140 +1,148 @@
 # Work in progress: Sample ci pipeline file
+environment_variables:
+  BUILD_IMAGE_NAME: java-test-app
 pipelines:
-  service1:
+  build:
     group: appGroup
     materials:
       repo:  # this is the name of material
         # says about type of material and url at once
         git: https://github.com/stakater/java-test-app-ci-and-versioning
     stages:
-      - build: # name of stage
+      - create-build-image:
           jobs:
-            build: # name of the job
+            build-image:
               tasks:
-               - exec: # indicates type of task
-                   command: /bin/bash
-                   arguments:
-                    - "-c"
-                    - "sudo docker run -d --name docker_javawebapp -v /home/gradle:/home/gradle rasheedamir/java-web-app-docker"
-               - exec: # indicates type of task
-                   command: /bin/bash
-                   arguments:
-                    - "-c"
-                    - "sudo docker cp ./ docker_javawebapp:/home/aurora"
-               - exec: # indicates type of task
-                   command: /bin/bash
-                   arguments:
-                    - "-c"
-                    - "sudo docker exec docker_javawebapp /bin/bash -c \"export GRADLE_USER_HOME=/home/gradle/.gradle; cd /home/aurora/; gradle clean -x test build --info\""
-               - exec: # indicates type of task
-                   command: /bin/bash
-                   arguments:
-                    - "-c"
-                    - "sudo docker cp docker_javawebapp:/home/aurora/build/libs/gs-serving-web-content-0.1.0.jar ."
-               - exec: # indicates type of task
-                   command: /bin/bash
-                   arguments:
-                    - "-c"
-                    - "sudo docker stop docker_javawebapp"
-               - exec: # indicates type of task
-                   command: /bin/bash
-                   arguments:
-                    - "-c"
-                    - "sudo docker rm -v docker_javawebapp"
-      - package: # name of stage
+                - exec:
+                    command: /bin/bash
+                    arguments:
+                      - "-c"
+                      - "sudo docker build -f deployment/build/Dockerfile -t ${BUILD_IMAGE_NAME} ."
+                - exec:
+                    command: /bin/bash
+                    run_if: passed
+                    arguments:
+                      - "-c"
+                      - "sudo docker run -d --name ${BUILD_IMAGE_NAME}-container -v /home/.gradle:/root/.gradle -v /home/.m2:/root/.m2 ${BUILD_IMAGE_NAME}"
+      - compile: # name of stage
           jobs:
-            package: # name of the job
-              environment_variables:
-                VERSION: 1.0.0
+            compile: # name of the job
               tasks:
-               - exec: # indicates type of task
-                   command: /bin/bash
-                   arguments:
-                    - "-c"
-                    - "sudo docker build -t helloworld:${VERSION}-${GO_PIPELINE_COUNTER} ."
-               - exec: # indicates type of task
-                   command: /bin/bash
-                   arguments:
-                    - "-c"
-                    - "sudo rm *.jar"
-      - deploy-test: # name of stage
+                - exec: # indicates type of task
+                    command: /bin/bash
+                    run_if: passed
+                    arguments:
+                      - "-c"
+                      - "sudo docker exec ${BUILD_IMAGE_NAME}-container gradle clean -x test build --info"
+      - test:
           jobs:
-            deploy-test: # name of the job
-              environment_variables:
-                VERSION: 1.0.0
-                SPRING_PROFILES_ACTIVE: dev
-                EXTERNAL_PORT: 9080
+            gradle-tests:
               tasks:
-               - exec: # indicates type of task
-                   command: /bin/bash
-                   arguments:
-                    - "-c"
-                    - "printenv > env-${SPRING_PROFILES_ACTIVE}"
-               - exec: # indicates type of task
-                   command: /bin/bash
-                   arguments:
-                    - "-c"
-                    - "sudo docker run -d -p ${EXTERNAL_PORT}:8080 --env-file ./env-${SPRING_PROFILES_ACTIVE} helloworld:${VERSION}-${GO_PIPELINE_COUNTER}"
-      - deploy-stage: # name of stage
-          jobs:
-            deploy-stage: # name of the job
-              environment_variables:
-                VERSION: 1.0.0
-                SPRING_PROFILES_ACTIVE: stage
-                EXTERNAL_PORT: 9090
-              tasks:
-               - exec: # indicates type of task
-                   command: /bin/bash
-                   arguments:
-                    - "-c"
-                    - "printenv > env-${SPRING_PROFILES_ACTIVE}"
-               - exec: # indicates type of task
-                   command: /bin/bash
-                   arguments:
-                    - "-c"
-                    - "sudo docker run -d -p ${EXTERNAL_PORT}:8090 --env-file ./env-${SPRING_PROFILES_ACTIVE} helloworld:${VERSION}-${GO_PIPELINE_COUNTER}"
-      - publish: # name of stage
-          jobs:
-            publish: # name of the job
-              environment_variables:
-                VERSION: 1.0.0
-              tasks:
-               - exec: # indicates type of task
-                   command: /bin/bash
-                   arguments:
-                    - "-c"
-                    - "git checkout -b release-${VERSION}"
-               - exec: # indicates type of task
-                   command: /bin/bash
-                   arguments:
-                    - "-c"
-                    - "git push -u origin release-${VERSION}"
-               - exec: # indicates type of task
-                   command: /bin/bash
-                   arguments:
-                    - "-c"
-                    - "git tag ${VERSION}"
-               - exec: # indicates type of task
-                   command: /bin/bash
-                   arguments:
-                    - "-c"
-                    - "git push origin ${VERSION}"
-      - deploy-prod: # name of stage
-          approval: manual
-          jobs:
-            deploy-prod: # name of the job
-              environment_variables:
-                VERSION: 1.0.0
-                SPRING_PROFILES_ACTIVE: prod
-                EXTERNAL_PORT: 9070
-              tasks:
-               - exec: # indicates type of task
-                   command: /bin/bash
-                   arguments:
-                    - "-c"
-                    - "printenv > env-${SPRING_PROFILES_ACTIVE}"
-               - exec: # indicates type of task
-                   command: /bin/bash
-                   arguments:
-                    - "-c"
-                    - "sudo docker run -d -p ${EXTERNAL_PORT}:8080 --env-file ./env-${SPRING_PROFILES_ACTIVE} helloworld:${VERSION}-${GO_PIPELINE_COUNTER}"
+                - exec:
+                    command: /bin/bash
+                    arguments:
+                      - "-c"
+                      - "sudo docker exec ${BUILD_IMAGE_NAME}-container gradle test"
+#
+#               - exec: # indicates type of task
+#                   command: /bin/bash
+#                   arguments:
+#                    - "-c"
+#                    - "sudo docker rm -v docker_javawebapp"
+#      - package: # name of stage
+#          jobs:
+#            package: # name of the job
+#              environment_variables:
+#                VERSION: 1.0.0
+#              tasks:
+#               - exec: # indicates type of task
+#                   command: /bin/bash
+#                   arguments:
+#                    - "-c"
+#                    - "sudo docker build -t helloworld:${VERSION}-${GO_PIPELINE_COUNTER} ."
+#               - exec: # indicates type of task
+#                   command: /bin/bash
+#                   arguments:
+#                    - "-c"
+#                    - "sudo rm *.jar"
+#      - deploy-test: # name of stage
+#          jobs:
+#            deploy-test: # name of the job
+#              environment_variables:
+#                VERSION: 1.0.0
+#                SPRING_PROFILES_ACTIVE: dev
+#                EXTERNAL_PORT: 9080
+#              tasks:
+#               - exec: # indicates type of task
+#                   command: /bin/bash
+#                   arguments:
+#                    - "-c"
+#                    - "printenv > env-${SPRING_PROFILES_ACTIVE}"
+#               - exec: # indicates type of task
+#                   command: /bin/bash
+#                   arguments:
+#                    - "-c"
+#                    - "sudo docker run -d -p ${EXTERNAL_PORT}:8080 --env-file ./env-${SPRING_PROFILES_ACTIVE} helloworld:${VERSION}-${GO_PIPELINE_COUNTER}"
+#      - deploy-stage: # name of stage
+#          jobs:
+#            deploy-stage: # name of the job
+#              environment_variables:
+#                VERSION: 1.0.0
+#                SPRING_PROFILES_ACTIVE: stage
+#                EXTERNAL_PORT: 9090
+#              tasks:
+#               - exec: # indicates type of task
+#                   command: /bin/bash
+#                   arguments:
+#                    - "-c"
+#                    - "printenv > env-${SPRING_PROFILES_ACTIVE}"
+#               - exec: # indicates type of task
+#                   command: /bin/bash
+#                   arguments:
+#                    - "-c"
+#                    - "sudo docker run -d -p ${EXTERNAL_PORT}:8090 --env-file ./env-${SPRING_PROFILES_ACTIVE} helloworld:${VERSION}-${GO_PIPELINE_COUNTER}"
+#      - publish: # name of stage
+#          jobs:
+#            publish: # name of the job
+#              environment_variables:
+#                VERSION: 1.0.0
+#              tasks:
+#               - exec: # indicates type of task
+#                   command: /bin/bash
+#                   arguments:
+#                    - "-c"
+#                    - "git checkout -b release-${VERSION}"
+#               - exec: # indicates type of task
+#                   command: /bin/bash
+#                   arguments:
+#                    - "-c"
+#                    - "git push -u origin release-${VERSION}"
+#               - exec: # indicates type of task
+#                   command: /bin/bash
+#                   arguments:
+#                    - "-c"
+#                    - "git tag ${VERSION}"
+#               - exec: # indicates type of task
+#                   command: /bin/bash
+#                   arguments:
+#                    - "-c"
+#                    - "git push origin ${VERSION}"
+#      - deploy-prod: # name of stage
+#          approval: manual
+#          jobs:
+#            deploy-prod: # name of the job
+#              environment_variables:
+#                VERSION: 1.0.0
+#                SPRING_PROFILES_ACTIVE: prod
+#                EXTERNAL_PORT: 9070
+#              tasks:
+#               - exec: # indicates type of task
+#                   command: /bin/bash
+#                   arguments:
+#                    - "-c"
+#                    - "printenv > env-${SPRING_PROFILES_ACTIVE}"
+#               - exec: # indicates type of task
+#                   command: /bin/bash
+#                   arguments:
+#                    - "-c"
+#                    - "sudo docker run -d -p ${EXTERNAL_PORT}:8080 --env-file ./env-${SPRING_PROFILES_ACTIVE} helloworld:${VERSION}-${GO_PIPELINE_COUNTER}"
