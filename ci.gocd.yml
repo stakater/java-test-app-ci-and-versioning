@@ -1,13 +1,13 @@
 # Work in progress: Sample ci pipeline file
-environment_variables:
-  BUILD_IMAGE_NAME: java-test-app
 pipelines:
   build:
     group: appGroup
+    environment_variables:
+      BUILD_IMAGE_NAME: java-test-app
     materials:
       repo:  # this is the name of material
         # says about type of material and url at once
-        git: https://github.com/stakater/java-test-app-ci-and-versioning
+        git: https://github.com/stakater/java-test-app-ci-and-versioning.git
     stages:
       - create-build-image:
           jobs:
