@@ -79,12 +79,27 @@ pipelines:
                       - "app_name=$(python3 ./pipeline-library/util/read-from-yml.py -f $(pwd)/application/app-info.yml -p application.name); \
                          python3 ./pipeline-library/versioning/generate-version.py -f $(pwd)/ci-metadata/${app_name}/app-ci-info.yml -d $(pwd)/application"
                 - exec: # Run Package
+                    run_if: passed
                     command: /bin/bash
                     arguments:
                       - "-c"
                       - "app_name=$(python3 ./pipeline-library/util/read-from-yml.py -f $(pwd)/application/app-info.yml -p application.name); \
                          current_version=$(python3 ./pipeline-library/util/read-from-yml.py -f $(pwd)/ci-metadata/${app_name}/app-ci-info.yml -p ci-data.current-version); \
                          sudo docker exec ${BUILD_IMAGE_NAME}-container gradle -Poutput-name=${app_name} -Pversion=${current_version} build war"
+      - publish-docker-registry:
+          jobs:
+            build-and-push:
+              tasks:
+                - exec:
+                    run_if: passed
+                    command: /bin/bash
+                    arguments:
+                      - "-c"
+                      - "app_name=$(python3 ./pipeline-library/util/read-from-yml.py -f $(pwd)/application/app-info.yml -p application.name); \
+                         current_version=$(python3 ./pipeline-library/util/read-from-yml.py -f $(pwd)/ci-metadata/${app_name}/app-ci-info.yml -p ci-data.current-version); \
+                         sudo docker build -t ${app_name}:${current_version//+/.} -f ./application/deployment/publish/Dockerfile ./application/deployment/publish" 
+          
+
 #      - deploy-test: # name of stage
 #          jobs:
 #            deploy-test: # name of the job
