@@ -21,19 +21,20 @@ pipelines:
                          ci_file_path=\"/stakater/app-ci-metadata/${app_name}/app-ci-info.yml\";
                          python3 /stakater/pipeline-library/versioning/inc-build-number.py -f ${ci_file_path};"
                 - exec:
+                    run_if: passed
                     command: /bin/bash
                     arguments:
                       - "-c"
                       - "sudo docker build -f deployment/build/Dockerfile -t ${BUILD_IMAGE_NAME} ."
                 - exec: 
-                    command: /bin/bash
                     run_if: any
+                    command: /bin/bash
                     arguments: 
                       - "-c"
                       - "sudo docker rmi $(docker images | grep none | awk '{print $3}')"
                 - exec:
-                    command: /bin/bash
                     run_if: passed
+                    command: /bin/bash
                     arguments:
                       - "-c"
                       - "sudo docker run -d --name ${BUILD_IMAGE_NAME}-container -v /home/.gradle:/root/.gradle -v /home/.m2:/root/.m2 -v $(pwd)/deployment/publish/outputs:/home/aurora/build/libs/ ${BUILD_IMAGE_NAME}"
@@ -42,8 +43,8 @@ pipelines:
             compile: # name of the job
               tasks:
                 - exec: # indicates type of task
-                    command: /bin/bash
                     run_if: passed
+                    command: /bin/bash
                     arguments:
                       - "-c"
                       - "sudo docker exec ${BUILD_IMAGE_NAME}-container gradle clean -x test build --info"
@@ -52,6 +53,7 @@ pipelines:
             gradle-tests:
               tasks:
                 - exec:
+                    run_if: passed
                     command: /bin/bash
                     arguments:
                       - "-c"
@@ -60,13 +62,15 @@ pipelines:
           jobs:
             package: # name of the job
               tasks:
-                - exec:
+                - exec: # Generate new version
+                    run_if: passed
                     command: /bin/bash
+                    arguments:
                       - "-c"
                       - "app_name=$(python3 /stakater/pipeline-library/util/read-from-yml.py -f $(pwd)/app-info.yml -p application.name); \
                          ci_file_path=\"/stakater/app-ci-metadata/${app_name}/app-ci-info.yml\"; \
                          python3 /stakater/pipeline-library/versioning/generate-version.py -f ${ci_file_path} -d $(pwd)"
-                - exec: # indicates type of task
+                - exec: # Run Package
                     command: /bin/bash
                     arguments:
                       - "-c"
