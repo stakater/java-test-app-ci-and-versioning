@@ -56,23 +56,23 @@ pipelines:
                     arguments:
                       - "-c"
                       - "sudo docker exec ${BUILD_IMAGE_NAME}-container gradle test"
-     - package: # name of stage
-         jobs:
-           package: # name of the job
-             tasks:
-              - exec:
-                command: /bin/bash
-                  - "-c"
-                  - "app_name=$(python3 /stakater/pipeline-library/util/read-from-yml.py -f $(pwd)/app-info.yml -p application.name); \
-                     ci_file_path=\"/stakater/app-ci-metadata/${app_name}/app-ci-info.yml\"; \
-                     python3 /stakater/pipeline-library/versioning/generate-version.py -f ${ci_file_path} -d $(pwd)"
-              - exec: # indicates type of task
-                  command: /bin/bash
-                  arguments:
-                   - "-c"
-                   - "app_name=$(python3 /stakater/pipeline-library/util/read-from-yml.py -f $(pwd)/app-info.yml -p application.name); \
-                      current_version=$(python3 /stakater/pipeline-library/util/read-from-yml.py -f /stakater/app-ci-metadata/${app_name}/app-ci-info.yml -p ci-data.current-version); \
-                      sudo docker exec ${BUILD_IMAGE_NAME}-container gradle -Poutput-name=${app_name} -Pversion=${current_version} build war"
+      - package: # name of stage
+          jobs:
+            package: # name of the job
+              tasks:
+                - exec:
+                    command: /bin/bash
+                      - "-c"
+                      - "app_name=$(python3 /stakater/pipeline-library/util/read-from-yml.py -f $(pwd)/app-info.yml -p application.name); \
+                         ci_file_path=\"/stakater/app-ci-metadata/${app_name}/app-ci-info.yml\"; \
+                         python3 /stakater/pipeline-library/versioning/generate-version.py -f ${ci_file_path} -d $(pwd)"
+                - exec: # indicates type of task
+                    command: /bin/bash
+                    arguments:
+                      - "-c"
+                      - "app_name=$(python3 /stakater/pipeline-library/util/read-from-yml.py -f $(pwd)/app-info.yml -p application.name); \
+                         current_version=$(python3 /stakater/pipeline-library/util/read-from-yml.py -f /stakater/app-ci-metadata/${app_name}/app-ci-info.yml -p ci-data.current-version); \
+                         sudo docker exec ${BUILD_IMAGE_NAME}-container gradle -Poutput-name=${app_name} -Pversion=${current_version} build war"
 #      - deploy-test: # name of stage
 #          jobs:
 #            deploy-test: # name of the job
