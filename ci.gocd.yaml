@@ -17,8 +17,7 @@ pipelines:
                     command: /bin/bash
                     arguments:
                       - "-c"
-                      - "echo $0"
-                      - "whoami"
+                      - "echo $0; whoami"
                 - exec:
                     command: /bin/bash
                     arguments:
