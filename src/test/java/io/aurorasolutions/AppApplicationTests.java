@@ -12,7 +12,7 @@ public class AppApplicationTests {
 
 	@Test
 	public void contextLoads() {
-	    assertEquals(2, 2);
+	    assertEquals(2, 1);
 	}
 
 }
