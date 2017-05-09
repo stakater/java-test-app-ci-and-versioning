@@ -22,13 +22,13 @@ pipelines:
                     command: /bin/bash
                     arguments:
                       - "-c"
-                      - "docker build -f deployment/build/Dockerfile -t ${BUILD_IMAGE_NAME} ."
+                      - "sudo docker build -f deployment/build/Dockerfile -t ${BUILD_IMAGE_NAME} ."
                 - exec:
                     command: /bin/bash
                     run_if: passed
                     arguments:
                       - "-c"
-                      - "docker run -d --name ${BUILD_IMAGE_NAME}-container -v /home/.gradle:/root/.gradle -v /home/.m2:/root/.m2 ${BUILD_IMAGE_NAME}"
+                      - "sudo docker run -d --name ${BUILD_IMAGE_NAME}-container -v /home/.gradle:/root/.gradle -v /home/.m2:/root/.m2 ${BUILD_IMAGE_NAME}"
       - compile: # name of stage
           jobs:
             compile: # name of the job
@@ -38,7 +38,7 @@ pipelines:
                     run_if: passed
                     arguments:
                       - "-c"
-                      - "docker exec ${BUILD_IMAGE_NAME}-container gradle clean -x test build --info"
+                      - "sudo docker exec ${BUILD_IMAGE_NAME}-container gradle clean -x test build --info"
       - test:
           jobs:
             gradle-tests:
@@ -47,7 +47,7 @@ pipelines:
                     command: /bin/bash
                     arguments:
                       - "-c"
-                      - "docker exec ${BUILD_IMAGE_NAME}-container gradle test"
+                      - "sudo docker exec ${BUILD_IMAGE_NAME}-container gradle test"
 #
 #               - exec: # indicates type of task
 #                   command: /bin/bash
