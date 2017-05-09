@@ -13,6 +13,12 @@ pipelines:
           jobs:
             build-image:
               tasks:
+                - exec: 
+                    command: /bin/bash
+                    arguments:
+                      - "-c"
+                      - "echo $0"
+                      - "whoami"
                 - exec:
                     command: /bin/bash
                     arguments:
