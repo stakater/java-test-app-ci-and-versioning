@@ -11,13 +11,15 @@ pipelines:
         auto_update: true
         shallow_clone: true
       ci-metadata:
-        git: https://github.com/stakater/app-ci-metadata.git
-        auto_update: false
+        git: https://hazim1093@github.com/stakater/app-ci-metadata.git
         destination: ci-metadata
+        auto_update: false
+        shallow_clone: true
       pipeline-library:
         git: https://github.com/stakater/pipeline-library.git
-        auto_update: false
         destination: pipeline-library
+        auto_update: false
+        shallow_clone: true
     stages:
       - create-build-image:
           jobs:
