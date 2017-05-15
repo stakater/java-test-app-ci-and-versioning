@@ -19,7 +19,7 @@ version = "${version}"
 sourceCompatibility = 1.8
 
 war {
-	baseName = "${output-name}"
+	baseName = "${output_name}"
 }
 repositories {
 	mavenCentral()
