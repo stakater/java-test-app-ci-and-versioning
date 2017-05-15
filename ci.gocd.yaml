@@ -6,12 +6,12 @@ pipelines:
       BUILD_IMAGE_NAME: java-test-app
     materials:
       application:
-        git: https://github.com/stakater/java-test-app-ci-and-versioning.git
+        git: git@github.com:stakater/java-test-app-ci-and-versioning.git
         destination: application
         auto_update: true
         shallow_clone: true
       ci-metadata:
-        git: https://hazim1093@github.com/stakater/app-ci-metadata.git
+        git: git@github.com:stakater/app-ci-metadata.git
         destination: ci-metadata
         auto_update: false
         shallow_clone: true
@@ -29,8 +29,7 @@ pipelines:
                     command: /bin/bash
                     arguments:
                       - "-c"
-                      - "git config -l; \
-                         app_name=$(python3 ./pipeline-library/util/read-from-yml.py -f $(pwd)/application/app-info.yml -p application.name); \
+                      - "app_name=$(python3 ./pipeline-library/util/read-from-yml.py -f $(pwd)/application/app-info.yml -p application.name); \
                          python3 ./pipeline-library/versioning/inc-build-number.py -f $(pwd)/ci-metadata/${app_name}"
                 - exec:
                     run_if: passed
