@@ -25,6 +25,11 @@ pipelines:
           jobs:
             build-image:
               tasks:
+                - exec:
+                    command: /bin/bash
+                    arguments:
+                      - "-c"
+                      - "git -C ./ci-metadata pull; git -C ./pipeline-library pull"
                 - exec: 
                     command: /bin/bash
                     arguments:
