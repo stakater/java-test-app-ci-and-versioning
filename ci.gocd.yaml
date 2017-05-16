@@ -82,7 +82,7 @@ pipelines:
                       - "-c"
                       - "app_name=$(python3 ./pipeline-library/util/read-from-yml.py -f $(pwd)/application/app-info.yml -p application.name); \
                          python3 ./pipeline-library/versioning/generate-version.py -f $(pwd)/ci-metadata/${app_name}/app-ci-info.yml -d $(pwd)/application; \
-                         python3 ./pipeline-library/versioning/tag-release.py -f $(pwd)/ci-metadata/${app_name}/app-ci.info.yml -d $(pwd)/application;"
+                         python3 ./pipeline-library/versioning/tag-release.py -f $(pwd)/ci-metadata/${app_name}/app-ci-info.yml -d $(pwd)/application;"
                 - exec: # Run Package
                     run_if: passed
                     command: /bin/bash
