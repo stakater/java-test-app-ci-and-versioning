@@ -60,7 +60,7 @@ pipelines:
                     command: /bin/bash
                     arguments:
                       - "-c"
-                      - "sudo docker run --rm --name ${BUILD_IMAGE_NAME}-compile ${BUILD_IMAGE_NAME} gradle clean -x test build --info"
+                      - "sudo docker run --rm --name ${BUILD_IMAGE_NAME}-compile -v /home/.gradle:/root/.gradle -v /home/.m2:/root/.m2 ${BUILD_IMAGE_NAME} gradle clean -x test build --info"
       - test:
           jobs:
             gradle-tests:
@@ -70,7 +70,7 @@ pipelines:
                     command: /bin/bash
                     arguments:
                       - "-c"
-                      - "sudo docker run --rm --name ${BUILD_IMAGE_NAME}-test ${BUILD_IMAGE_NAME} gradle test"
+                      - "sudo docker run --rm --name ${BUILD_IMAGE_NAME}-test -v /home/.gradle:/root/.gradle -v /home/.m2:/root/.m2 ${BUILD_IMAGE_NAME} gradle test"
       - package: # name of stage
           jobs:
             package: # name of the job
