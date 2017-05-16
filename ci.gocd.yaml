@@ -29,7 +29,10 @@ pipelines:
                     command: /bin/bash
                     arguments:
                       - "-c"
-                      - "git -C ./ci-metadata pull; git -C ./pipeline-library pull"
+                      - "git config --global user.email 'gocd.stakater@gmail.com'; \
+                         git config --global user.name 'gocd-stakater'; \
+                         git -C ./ci-metadata pull; \
+                         git -C ./pipeline-library pull"
                 - exec: 
                     command: /bin/bash
                     arguments:
