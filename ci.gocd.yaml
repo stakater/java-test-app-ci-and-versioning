@@ -22,7 +22,6 @@ pipelines:
         shallow_clone: true
     stages:
       - create-build-image:
-          fetch_materials: yes
           jobs:
             build-image:
               tasks:
@@ -31,7 +30,9 @@ pipelines:
                     arguments:
                       - "-c"
                       - "git config --global user.email 'gocd.stakater@gmail.com'; \
-                         git config --global user.name 'gocd-stakater';"
+                         git config --global user.name 'gocd-stakater'; \
+                         git -C ./ci-metadata pull; \
+                         git -C ./pipeline-library pull"
                 - exec: 
                     command: /bin/bash
                     arguments:
@@ -51,10 +52,15 @@ pipelines:
                       - "-c"
                       - "sudo docker rmi $(sudo docker images | grep none | awk '{print $3}') || true"
       - compile: # name of stage
-          fetch_materials: yes
           jobs:
             compile: # name of the job
               tasks:
+                - exec:
+                    command: /bin/bash
+                    arguments:
+                      - "-c"
+                      - "git -C ./ci-metadata pull; \
+                         git -C ./pipeline-library pull"
                 - exec: # indicates type of task
                     run_if: passed
                     command: /bin/bash
@@ -62,10 +68,15 @@ pipelines:
                       - "-c"
                       - "sudo docker run --rm --name ${BUILD_IMAGE_NAME}-compile -v /home/.gradle:/root/.gradle -v /home/.m2:/root/.m2 ${BUILD_IMAGE_NAME} gradle clean -x test build --info"
       - test:
-          fetch_materials: yes
           jobs:
             gradle-tests:
               tasks:
+                - exec:
+                    command: /bin/bash
+                    arguments:
+                      - "-c"
+                      - "git -C ./ci-metadata pull; \
+                         git -C ./pipeline-library pull"
                 - exec:
                     run_if: passed
                     command: /bin/bash
@@ -73,10 +84,15 @@ pipelines:
                       - "-c"
                       - "sudo docker run --rm --name ${BUILD_IMAGE_NAME}-test -v /home/.gradle:/root/.gradle -v /home/.m2:/root/.m2 ${BUILD_IMAGE_NAME} gradle test"
       - package: # name of stage
-          fetch_materials: yes
           jobs:
             package: # name of the job
               tasks:
+                - exec:
+                    command: /bin/bash
+                    arguments:
+                      - "-c"
+                      - "git -C ./ci-metadata pull; \
+                         git -C ./pipeline-library pull"
                 - exec: # Generate new version
                     run_if: passed
                     command: /bin/bash
@@ -94,10 +110,15 @@ pipelines:
                          current_version=$(python3 ./pipeline-library/util/read-from-yml.py -f $(pwd)/ci-metadata/${app_name}/app-ci-info.yml -p ci-data.current-version); \
                          sudo docker run --rm --name ${BUILD_IMAGE_NAME}-package -v /home/.gradle:/root/.gradle -v /home/.m2:/root/.m2 -v /stakater/outputs/${app_name}:/home/aurora/build/libs/ ${BUILD_IMAGE_NAME} gradle -Poutput_name=${app_name} -Pversion=${current_version} war"
       - publish-docker-registry:
-          fetch_materials: yes
           jobs:
             build-and-push:
               tasks:
+                - exec:
+                    command: /bin/bash
+                    arguments:
+                      - "-c"
+                      - "git -C ./ci-metadata pull; \
+                         git -C ./pipeline-library pull"
                 - exec:
                     run_if: passed
                     command: /bin/bash
