@@ -5,10 +5,12 @@ FROM stakater/tomcat:8.5.11-alpine
 WORKDIR /tomcat
 
 # Output path relative to build context
-ARG OUTPUT_PATH="outputs"
+ARG OUTPUT_PATH="output"
+ARG OUTPUT_FILE_NAME
+
 RUN rm -Rf webapps/*
 
-ADD ${OUTPUT_PATH}/*.war webapps/ROOT.war
+ADD ${OUTPUT_PATH}/${OUTPUT_FILE_NAME} webapps/ROOT.war
 
 EXPOSE 8080
 # Use baseimage-docker's init system.
