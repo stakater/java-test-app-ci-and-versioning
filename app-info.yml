@@ -6,7 +6,7 @@ application:
   group: "test"
 
 deployment:
-  build-output-path: "./docker-data/publish"
+  docker-registry: "localhost:5000"
 # Versioning attributes
 # Version will only be read from here if it is bumped i.e. greater than the current version
 version:
