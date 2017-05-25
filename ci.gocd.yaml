@@ -126,8 +126,11 @@ pipelines:
                       - "-c"
                       - "app_name=$(python3 ./pipeline-library/util/read-from-yml.py -f $(pwd)/application/app-info.yml -p application.name); \
                          current_version=$(python3 ./pipeline-library/util/read-from-yml.py -f $(pwd)/ci-metadata/${app_name}/app-ci-info.yml -p ci-data.current-version); \
+                         registry=$(python3 ./pipeline-library/util/read-from-yml.py -f $(pwd)/application/app-info.yml -p deployment.docker-registry); \
                          output_folder_name=output; \
                          mkdir -p ./application/deployment/publish/${output_folder_name}; \
                          output_file_name=${app_name}-${current_version}.war; \
                          cp /stakater/outputs/${app_name}/${output_file_name} ./application/deployment/publish/output/; \
-                         sudo docker build --build-arg OUTPUT_PATH=${output_folder_name} --build-arg OUTPUT_FILE_NAME=${output_file_name} -t ${app_name}:${current_version//+/.} -f ./application/deployment/publish/Dockerfile ./application/deployment/publish"
+                         docker_image_name=${registry}/${app_name}:${current_version//+/.}; \
+                         sudo docker build --build-arg OUTPUT_PATH=${output_folder_name} --build-arg OUTPUT_FILE_NAME=${output_file_name} -t ${docker_image_name} -f ./application/deployment/publish/Dockerfile ./application/deployment/publish; \
+                         sudo docker push ${docker_image_name}"
