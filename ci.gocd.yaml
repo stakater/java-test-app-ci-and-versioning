@@ -130,7 +130,7 @@ pipelines:
                                          --dns=${CONSUL_DNS} \
                                          --dns-search=service.consul \
                                          ${BUILD_IMAGE_NAME} \
-                                         gradle -Poutput_name=${app_name} -Pversion=${current_version} upload"
+                                         gradle -Poutput_name=${app_name} -Pversion=${current_version} -Pnexus.host=nexus upload"
       - publish-docker-registry:
           jobs:
             build-and-push:
