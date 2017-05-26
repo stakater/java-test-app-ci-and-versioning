@@ -109,6 +109,28 @@ pipelines:
                       - "app_name=$(python3 ./pipeline-library/util/read-from-yml.py -f $(pwd)/application/app-info.yml -p application.name); \
                          current_version=$(python3 ./pipeline-library/util/read-from-yml.py -f $(pwd)/ci-metadata/${app_name}/app-ci-info.yml -p ci-data.current-version); \
                          sudo docker run --rm --name ${BUILD_IMAGE_NAME}-package -v /home/.gradle:/root/.gradle -v /home/.m2:/root/.m2 -v /stakater/outputs/${app_name}:/home/aurora/build/libs/ ${BUILD_IMAGE_NAME} gradle -Poutput_name=${app_name} -Pversion=${current_version} war"
+      - publish-nexus:
+          jobs:
+            push:
+              tasks:
+                - exec:
+                    command: /bin/bash
+                    arguments:
+                      - "-c"
+                      - "git -C ./ci-metadata pull; \
+                         git -C ./pipeline-library pull"
+                - exec:
+                    run_if: passed
+                    command: /bin/bash
+                    arguments:
+                      - "-c"
+                      - "app_name=$(python3 ./pipeline-library/util/read-from-yml.py -f $(pwd)/application/app-info.yml -p application.name); \
+                         current_version=$(python3 ./pipeline-library/util/read-from-yml.py -f $(pwd)/ci-metadata/${app_name}/app-ci-info.yml -p ci-data.current-version); \
+                         sudo docker run --rm --name ${BUILD_IMAGE_NAME}-push-nexus -v /home/.gradle:/root/.gradle -v /home/.m2:/root/.m2 \
+                                         --dns=${CONSUL_DNS} \
+                                         --dns-search=service.consul \
+                                         ${BUILD_IMAGE_NAME} \
+                                         gradle -Poutput_name=${app_name} -Pversion=${current_version} upload"
       - publish-docker-registry:
           jobs:
             build-and-push:
