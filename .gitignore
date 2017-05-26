@@ -22,3 +22,6 @@ gradle/wrapper/gradle-wrapper.properties
 
 # User-specific stuff:
 .idea
+.history
+docker-data
+deployment/publish/outputs
