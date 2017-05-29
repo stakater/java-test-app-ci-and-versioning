@@ -5,8 +5,6 @@ application:
   name: "java-test-app"
   group: "test"
 
-deployment:
-  docker-registry: "localhost:5000"
 # Versioning attributes
 # Version will only be read from here if it is bumped i.e. greater than the current version
 version:
