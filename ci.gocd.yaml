@@ -3,7 +3,7 @@ pipelines:
   build:
     group: java-test-app
     environment_variables:
-      BUILD_IMAGE_NAME: java-test-app
+      BUILD_IMAGE_NAME: java-test-app-build
     materials:
       application:
         git: git@github.com:stakater/java-test-app-ci-and-versioning.git
